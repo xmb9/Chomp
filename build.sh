@@ -96,7 +96,6 @@ cp initramfs.cpio.gz /tmp/grubmount/syslinux/
 read -r -d '' chomp_grubentry << 'EOF'
 menuentry "Chomp injected shim" {
    linux /syslinux/vmlinuz.A ${args}
-   echo "Injecting Chomp as initramfs..."
    initrd /syslinux/initramfs.cpio.gz
 }
 EOF
