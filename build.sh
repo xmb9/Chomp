@@ -29,6 +29,9 @@ echo "xmb9: Gave birth to CHOMP"
 echo "kxtzownsu: got the first ever shim on uefi working, made picoshim, testing"
 echo "vk6: made extract_initramfs.sh"
 
+echo "Requirements:"
+echo "binwalk v2, vboot-utils"
+
 SHIM="$1"
 initramfs="/tmp/chomp_initramfs"
 
@@ -76,6 +79,26 @@ echo "GRUB"
 rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
 kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
 
+args=$(vbutil-kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#")
 
+args+=" cros_debug"
+
+echo "boot arguments: ${args}"
+
+mkdir /tmp/grubmount
+mount "$loopdev"p12 /tmp/grubmount
+
+read -r -d '' chomp_grubentry << 'EOF'
+menuentry "Chomp injected shim" {
+   linux /syslinux/vmlinuz.A ${args}
+}
+EOF
+
+awk -v replacement="$chomp_grubentry" '
+  BEGIN { in_block=0 }
+  /^menuentry "local image A"/ { in_block=1; print replacement; next }
+  in_block && /^}/ { in_block=0; next }
+  !in_block
+' /tmp/grubmount/efi/boot/grub.cfg > /tmp/grubmount/efi/boot/grub.cfg.new && mv /tmp/grubmount/efi/boot/grub.cfg.new /tmp/grubmount/efi/boot/grub.cfg
 
 losetup -D
