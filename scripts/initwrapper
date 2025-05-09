@@ -1,0 +1,12 @@
+#!/bin/busybox sh
+
+echo "CHOMP init wrapper"
+
+echo "Copying payload to /newroot/usr/sbin/factory_install.sh"
+
+cp /payload /newroot/usr/sbin/factory_install.sh
+
+if [ -f /payloadwrapper ]; then
+	echo "Running the payload's install script"
+	busybox sh payloadwrapper
+fi
