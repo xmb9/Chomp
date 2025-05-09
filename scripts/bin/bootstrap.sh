@@ -330,7 +330,7 @@ use_new_root() {
   #     exec switch_root "${NEWROOT_MNT}" /usr/sbin/factory_shim_service.sh
 
   # -v prints upstart info in kmsg (available in INFO_TTY).
-  info "Executing CHOMP initwrapper."
+  info "Executing Chomp initwrapper."
   stop_log_file
   busybox sh /initwrapper
   exec switch_root "${NEWROOT_MNT}" /sbin/init -v --default-console output
@@ -346,7 +346,7 @@ main() {
   mkdir -p "${USB_MNT}" "${STATEFUL_MNT}" "${LOG_DIR}" "${NEWROOT_MNT}"
 
   exec >"${LOG_FILE}" 2>&1
-  info "...:::||| Bootstrapping ChromeOS Factory Shim (CHOMP injected...) |||:::..."
+  info "...:::||| Bootstrapping ChromeOS Factory Shim (Chomp injected)... |||:::..."
   info "TTY: ${TTY}, LOG: ${LOG_TTY}, INFO: ${INFO_TTY}, DEBUG: ${DEBUG_TTY}"
 
   # Send all verbose output to debug TTY.

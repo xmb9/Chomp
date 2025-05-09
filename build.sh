@@ -79,7 +79,7 @@ echo "GRUB"
 rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
 kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
 
-args=$(vbutil_kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#")
+args=$(vbutil_kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#" | awk '{$1=$1};1')
 
 args+=" cros_debug"
 
@@ -90,9 +90,13 @@ echo "boot arguments: ${args}"
 mkdir /tmp/grubmount
 mount "$loopdev"p12 /tmp/grubmount
 
+cp initramfs.cpio.gz /tmp/grubmount/syslinux/
+
 read -r -d '' chomp_grubentry << 'EOF'
 menuentry "Chomp injected shim" {
    linux /syslinux/vmlinuz.A ${args}
+   echo "Injecting Chomp as initramfs..."
+   initrd /syslinux/initramfs.cpio.gz
 }
 EOF
 
@@ -105,4 +109,8 @@ awk -v replacement="$chomp_grubentry" '
   !in_block
 ' /tmp/grubmount/efi/boot/grub.cfg > /tmp/grubmount/efi/boot/grub.cfg.new && mv /tmp/grubmount/efi/boot/grub.cfg.new /tmp/grubmount/efi/boot/grub.cfg
 
+rm initramfs.cpio.gz
+
 losetup -D
+
+echo "Done!"
