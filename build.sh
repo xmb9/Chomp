@@ -79,8 +79,9 @@ echo "GRUB"
 rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
 kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
 
-args=$(vbutil_kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#" | awk '{$1=$1};1')
-
+args=$(vbutil_kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#")
+args=$(echo "$args" | sed 's/^[[:space:]]\+//')
+args="$(echo "$args" | tr -d '\n')"
 args+=" cros_debug"
 
 export args
@@ -110,6 +111,8 @@ awk -v replacement="$chomp_grubentry" '
 ' /tmp/grubmount/efi/boot/grub.cfg > /tmp/grubmount/efi/boot/grub.cfg.new && mv /tmp/grubmount/efi/boot/grub.cfg.new /tmp/grubmount/efi/boot/grub.cfg
 
 rm initramfs.cpio.gz
+
+umount /tmp/grubmount
 
 losetup -D
 
