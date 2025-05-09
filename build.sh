@@ -76,3 +76,6 @@ echo "GRUB"
 rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
 kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
 
+
+
+losetup -D
