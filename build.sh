@@ -79,9 +79,11 @@ echo "GRUB"
 rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
 kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
 
-args=$(vbutil-kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#")
+args=$(vbutil_kernel --verify "$loopdev"p2 | sed -n '/^Config:/,$p' | sed '1s/^Config:[[:space:]]*//' | sed -E "s#root=[^ ]+#root=PARTUUID=${rootuuid}#" | sed -E "s#kern_guid=[^ ]+#kern_guid=${kernguid}#")
 
 args+=" cros_debug"
+
+export args
 
 echo "boot arguments: ${args}"
 
@@ -93,6 +95,8 @@ menuentry "Chomp injected shim" {
    linux /syslinux/vmlinuz.A ${args}
 }
 EOF
+
+chomp_grubentry=$(echo "$chomp_grubentry" | envsubst)
 
 awk -v replacement="$chomp_grubentry" '
   BEGIN { in_block=0 }
