@@ -67,9 +67,12 @@ cd "$prev"
 
 echo "Done building initramfs."
 
-losetup -D
 rm -rf "$initramfs"
 rm -rf /tmp/shim_kernel/
 rm -rf /tmp/kernel.bin
 
-echo "Need to figure out grub next..."
+echo "GRUB"
+
+rootuuid=$(blkid -s PARTUUID -o value "$loopdev"p3)
+kernguid=$(blkid -s PARTUUID -o value "$loopdev"p2)
+
