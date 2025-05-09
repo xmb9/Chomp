@@ -26,7 +26,7 @@ echo "CHOMP builder ${VERSION}"
 
 echo "Credits:"
 echo "xmb9: Gave birth to CHOMP"
-echo "kxtzownsu: extract_initramfs.sh, PicoShim"
+echo "kxtzownsu: extract_initramfs.sh, PicoShim, the general idea"
 
 SHIM="$1"
 initramfs="/tmp/chomp_initramfs"
