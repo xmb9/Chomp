@@ -22,6 +22,11 @@ fi
 
 VERSION="v1.00"
 
+if [ "$1" == "-h" or "$1" == "--help" ]; then
+	echo "Usage: build.sh [shim.bin]"
+	exit
+fi
+
 echo "CHOMP builder ${VERSION}"
 
 echo "Credits:"
@@ -31,6 +36,17 @@ echo "vk6: made extract_initramfs.sh"
 
 echo "Requirements:"
 echo "binwalk v2, vboot-utils"
+
+if [ ! $(which binwalk) ]; then
+	fail "binwalk isn't installed"
+fi
+if [ ! $(which vbutil_kernel) ]; then
+        fail "vboot-utils isn't installed or doesn't have vbutil_kernel"
+fi
+if [ ! $(binwalk --help | grep "v2.x" -o) ]; then
+        fail "binwalk v3 or later is installed, v2 is REQUIRED!"
+fi
+
 
 SHIM="$1"
 initramfs="/tmp/chomp_initramfs"
@@ -90,6 +106,9 @@ echo "boot arguments: ${args}"
 
 mkdir /tmp/grubmount
 mount "$loopdev"p12 /tmp/grubmount
+
+# Remove syslinux files to prevent BIOS booting. We do not plan to support this.
+rm -rf /tmp/grubmount/syslinux/*
 
 cp initramfs.cpio.gz /tmp/grubmount/syslinux/
 
