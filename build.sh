@@ -22,10 +22,12 @@ fi
 
 VERSION="v1.00"
 
-if [ "$1" == "-h" or "$1" == "--help" ]; then
+if [ "$1" == "-h" ] | [ "$1" == "--help" ]; then
 	echo "Usage: build.sh [shim.bin]"
 	exit
 fi
+
+source lib/func.sh
 
 echo "CHOMP builder ${VERSION}"
 
@@ -46,7 +48,6 @@ fi
 if [ ! $(binwalk --help | grep "v2.x" -o) ]; then
         fail "binwalk v3 or later is installed, v2 is REQUIRED!"
 fi
-
 
 SHIM="$1"
 initramfs="/tmp/chomp_initramfs"
@@ -78,6 +79,8 @@ prev=$(pwd)
 
 cd "$initramfs"
 
+sed -i 's/ChromeOS Factory Shim/ChompOS Factory Shim/g' bin/bootstrap.sh
+
 find . -print0 | cpio --null -ov --format=newc > "$prev"/initramfs.cpio
 echo "If all looks good here, and if prompted to overwrite, press \"y\""
 gzip "$prev"/initramfs.cpio
@@ -89,6 +92,10 @@ echo "Done building initramfs."
 rm -rf "$initramfs"
 rm -rf /tmp/shim_kernel/
 rm -rf /tmp/kernel.bin
+
+echo "Making ROOT-A writable."
+enable_rw_mount "${loopdev}"p3
+e2fsck -fy "${loopdev}"p3
 
 echo "GRUB"
 
@@ -108,7 +115,9 @@ mkdir /tmp/grubmount
 mount "$loopdev"p12 /tmp/grubmount
 
 # Remove syslinux files to prevent BIOS booting. We do not plan to support this.
+cp /tmp/grubmount/syslinux/vmlinuz* /tmp/
 rm -rf /tmp/grubmount/syslinux/*
+mv /tmp/vmlinuz* /tmp/grubmount/syslinux/ # Kind of need the kernel...
 
 cp initramfs.cpio.gz /tmp/grubmount/syslinux/
 
