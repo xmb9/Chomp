@@ -54,6 +54,7 @@ enable_debug_console() {
   local tty="$1"
   if ! is_cros_debug; then
     info "To debug, add [cros_debug] to your kernel command line."
+    info "(This is enabled by default in Chomp, why did you remove it?)"
   elif [ "${tty}" = /dev/null ] || ! tty_is_valid "${tty}"; then
     # User probably can't see this, but we don't have better way.
     info "Please set a valid [console=XXX] in kernel command line."
@@ -67,6 +68,7 @@ on_error() {
   trap - EXIT
   info -e '\033[1;31m'
   info "ERROR: Factory installation aborted."
+  info "Bailing out, you are on your own. Good luck."
   save_log_files
   enable_debug_console "${TTY}"
   sleep 1d
@@ -147,7 +149,7 @@ unmount_usb() {
   info "Unmounting ${USB_MNT}..."
   umount -n "${USB_MNT}"
   info ""
-  info "$REAL_USB_DEV can now be safely removed."
+  info "$REAL_USB_DEV can now be safely removed, everything from here on out is in RAM."
   info ""
 }
 
@@ -189,7 +191,7 @@ save_log_files() {
     info "mount the first partition, and find the logs in directory:"
     info "  ${save_dir_name}"
   else
-    info "Failures seen trying to save log file."
+    info "Failed trying to save log file."
   fi
 }
 
@@ -346,7 +348,7 @@ main() {
   mkdir -p "${USB_MNT}" "${STATEFUL_MNT}" "${LOG_DIR}" "${NEWROOT_MNT}"
 
   exec >"${LOG_FILE}" 2>&1
-  info "...:::||| Bootstrapping ChromeOS Factory Shim (Chomp injected)... |||:::..."
+  info "...:::||| Bootstrapping ChompOS Factory Shim... |||:::..."
   info "TTY: ${TTY}, LOG: ${LOG_TTY}, INFO: ${INFO_TTY}, DEBUG: ${DEBUG_TTY}"
 
   # Send all verbose output to debug TTY.

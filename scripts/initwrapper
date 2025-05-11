@@ -1,12 +1,26 @@
 #!/bin/busybox sh
 
-echo "Chomp init wrapper"
+source /newroot/etc/lsb-release
 
-echo "Copying payload to /newroot/usr/sbin/factory_install.sh"
+board=$(cat /sys/class/dmi/id/board_name)
+vendor=$(cat /sys/class/dmi/id/board_vendor)
 
-cp /payload /newroot/usr/sbin/factory_install.sh
+clear
 
-if [ -f /payloadwrapper ]; then
-	echo "Running the payload's install script"
-	busybox sh payloadwrapper
-fi
+echo "Chomp is injected into ChromeOS ${CHROMEOS_RELEASE_CHROME_MILESTONE} (${CHROMEOS_RELEASE_BOARD})"
+echo "Real device is: ${board} ${vendor}"
+
+export CHROMEOS_RELEASE_BOARD
+export CHROMEOS_RELEASE_CHROME_MILESTONE
+
+cat | envsubst <<EOF > /newroot/usr/sbin/factory_install.sh
+#!/bin/bash
+echo "ChompOS (injected into ${CHROMEOS_RELEASE_BOARD} R${CHROMEOS_RELEASE_CHROME_MILESTONE})"
+while true
+do
+	bash
+	echo "Did you mean to exit?"
+done
+EOF
+
+echo "Payload injected."
