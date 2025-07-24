@@ -45,7 +45,7 @@ fi
 if [ ! $(which vbutil_kernel) ]; then
         fail "vboot-utils isn't installed or doesn't have vbutil_kernel"
 fi
-if [ ! $(binwalk --help | grep "v2.x" -o) ]; then
+if [ ! $(binwalk --help | grep "v2.*" -o) ]; then
         fail "binwalk v3 or later is installed, v2 is REQUIRED!"
 fi
 
