@@ -71,7 +71,7 @@ losetup -P "$loopdev" "$SHIM"
 extract_initramfs_full "$loopdev" "$initramfs" "/tmp/shim_kernel/kernel.img" "x86_64"
 
 echo "Injecting CHOMP... (this is where the magic happens)"
-cp -r scripts/* "$initramfs"/
+cp -r lib/* "$initramfs"/
 
 echo "Creating initramfs."
 
